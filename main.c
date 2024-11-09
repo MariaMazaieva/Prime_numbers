@@ -4,19 +4,21 @@
 #include <stdlib.h>
 #define UPPER_BOUND 1000000
 #define MIN_VALUE 0
+#define size_B 100000
 // #define MAX_VALUE 991350783549
+//999983
 
-
-int sieve_of_Eratosthenes(long n);
-void division(int size, int B[ ], long number);
-void check_for_prime(bool A[], long * count_false);
-void array_of_primes(int B[ ], const bool A []);
-int* control_input(int *ret);
-void print_numbers(int * counter, int * power, int divisor);
+int sieve_of_Eratosthenes(int B[]);
+void division(int size, int B[], long number);
+int* control_input(int *ret, int count_arr,int B[] );
+// bool is_in_B(long n, int B[], int count_arr);
 
 int main(void) {
     int ret = EXIT_SUCCESS;
-    control_input(&ret);
+    int count_arr = 0;
+    int B [size_B] = {0};
+    count_arr = sieve_of_Eratosthenes(B);
+    control_input(&ret, count_arr, B);
     return ret;
 }
 /*Function reads numbers from stdin to variable number in a loop while, stops if number == 0.
@@ -25,7 +27,7 @@ int main(void) {
  * MIN_VALUE is set to 0, MAX_VALUE is set to 991350783549
  */
 
-int* control_input(int *ret) {
+int* control_input(int *ret, int count_arr,int B []) {
     long number = -1;
     while(1) {
         int result = scanf("%ld", &number);
@@ -47,7 +49,7 @@ int* control_input(int *ret) {
         else
             printf("Prvociselny rozklad cisla 1 je:\n1");
 
-        sieve_of_Eratosthenes(number);
+        division(count_arr,B, number);
     }
     return ret;
 }
@@ -58,102 +60,67 @@ int* control_input(int *ret) {
  * func division - is used to divide number and find its divisors.
  */
 
-int sieve_of_Eratosthenes (long n) {
+int sieve_of_Eratosthenes (int B[]) {
     bool A[UPPER_BOUND] ; // to count last one as well
-
+    //
     A[0] = false;
     A[1] = false;
     for (int i = 2; i < UPPER_BOUND; i++) //from 2, so 0 and 1 wont be in the array
         A[i] = true;
-    //set first and second to false
-    int count_arr = 0;
-    // int size = sizeof(A)/sizeof(A[]);
-    long count_false = 0;
-    check_for_prime(A, &count_false);
-    // printf("count false %lu\n", count_false);
-    count_arr = UPPER_BOUND - count_false-2;
-    // printf("primes %d",check_for_prime(A));
-    // for( int i = 0; i <= UPPER_BOUND; i++) {//count the amount of prime numbers for arr B
-    //     if(A[i])
-    //         count_arr++;
-    // }
-    // printf("Array %d\n",count_arr);
-    // printf("count false %lu\n", count_false);
-    // printf("count arr %d\n", count_arr);
-    int B[count_arr-1]; //creating arr B, size of amount of p
-    array_of_primes(B,A);
-    // count_arr = sqrt(count_arr);
-    division(count_arr,B, n);
 
-    return 0;
+    int index = 0;
+    int sqr = (int)sqrt(UPPER_BOUND);
+    for(int i = 2; i <UPPER_BOUND; i++) {
+        if (A[i] == true && i <= sqr) {
+            for(int j = i*i; j < UPPER_BOUND; j +=i) {
+                A[j] = false;
+            }
+        }
+        if (A[i]) {
+            B[index++] = i;
+        }
+    }
+    //  counter = sizeof(B) / sizeof(B[0]);
+    // *count_arr = counter;
+    return index;
 }
 
 /*Function divides number to the prime numbers, count its factorials as well.
  * @size  - amount of prime numbers we have from func sieve_of_Eratosthenes
  */
 
-void  check_for_prime(bool A[], long * count_false) {
-    *count_false = 0;
-    int sqr = (int)sqrt(UPPER_BOUND);
-    for(int i = 2; i < sqr; i++) {
-        for(int j = i*i; j < UPPER_BOUND; j +=i) {
-            if (A[j] == true) {
-                A[j] = false;
-                (*count_false)++;
-            }
-        }
-    }
-}
-
-void array_of_primes(int B[], const bool A[]) {
-    int index = 0;
-    for( int i = 0; i < UPPER_BOUND; i++) {
-        if(A[i] ) {
-            B[index++] = i;
-            // index++;
-        }
-    }
-}
-
-/*
-    int
-    for( int i = 0; i <= UPPER_BOUND; i++) {//count the amount of prime numbers for arr B
-        if(A[i])
-        count_arr++;
-    }
-    // printf("Array %d\n",count_arr);
-    int B[count_arr-1]; //creating arr B, size of amount of p
-    array_of_primes(B,A);
-    division(count_arr,B, n);
-*/
 void division(const int size,int B[],long number) {
-    int counter = 0;
-    // int power = ;
     bool first_number = true;
-    // size == sqrt(size);
-    for (int i = 0; i < size && number > 1; i++){
-        if( number % B[i] == 0) {
+    for (int i = 0; i <size -1 && number > 1; i++){
+        int n = B[i];
+        // if (n == 0) break;
+        if( number % n == 0) {
             int power = 1;
-            counter++;
-            number = number / B[i];
-            while (number % B[i] == 0) {
-                number = number / B[i];
+            number = number / n;
+            while (number % n == 0) {
+                number = number / n;
                 power++;
             }
             if(first_number) {
-                printf("%d",B[i]);
-                if(power > 1)
-                    printf("^%d",power);
+                printf("%d",n);
                 first_number = false;
             }else {
-                printf(" x %d", B[i]);
-                if(power > 1)
-                    printf("^%d",power);
+                printf(" x %d", n);
+            }
+            if (power > 1) {
+                printf("^%d", power);
             }
         }
     }
+    if (number > 1) {
+        if (!first_number) {
+            printf(" x ");
+        }
+        printf("%ld", number);
+    }
     putchar('\n');
 }
+
 // let A be an array of Boolean values, indexed by integers 2 to n,
 //   initially all set to true.
 //
